@@ -25,7 +25,7 @@ export async function generateMetadata({
     description: isEn
       ? 'TechPulse delivers in-depth reviews, tutorials, and insights on productivity tools, software, and technology trends.'
       : 'TechPulse 提供深入的生产力工具评测、软件教程和科技趋势分析。',
-    metadataBase: new URL('https://techpulse.com'),
+    metadataBase: new URL('https://xp58.xyz'),
     alternates: {
       canonical: `/${locale}`,
       languages: {
@@ -36,7 +36,7 @@ export async function generateMetadata({
     openGraph: {
       type: 'website',
       locale: isEn ? 'en_US' : 'zh_CN',
-      url: `https://techpulse.com/${locale}`,
+      url: `https://xp58.xyz/${locale}`,
       siteName: 'TechPulse',
       title: isEn ? 'TechPulse - Your Guide to Smarter Tech' : 'TechPulse - 您的智慧科技指南',
       description: isEn

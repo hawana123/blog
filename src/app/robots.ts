@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/_next/'],
     },
-    sitemap: 'https://techpulse.com/sitemap.xml',
+    sitemap: 'https://xp58.xyz/sitemap.xml',
   };
 }

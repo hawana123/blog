@@ -3,7 +3,7 @@ import { getAllSlugs } from '@/lib/blog';
 
 export const dynamic = 'force-static';
 
-const BASE_URL = 'https://techpulse.com';
+const BASE_URL = 'https://xp58.xyz';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const locales = ['en', 'zh'];

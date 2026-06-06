@@ -1,0 +1,34 @@
+---
+title: "CSS布局精通：Flexbox和Grid实战"
+excerpt: "使用CSS Flexbox和Grid构建响应式布局的实用示例和模式。"
+date: "2025-01-25"
+category: "软件技巧"
+tags: ["CSS", "Flexbox", "Grid", "网页设计"]
+author: "Sarah Lin"
+---
+
+现代CSS布局使用Flexbox和Grid已取代浮动和表格用于页面布局。掌握这些工具让你完全控制内容如何流动和响应不同屏幕尺寸。
+
+## Flexbox基础
+
+Flexbox在单轴上工作，行或列。在容器上设置display flex，然后使用justify-content进行主轴对齐，align-items进行交叉轴对齐。Flex-grow、flex-shrink和flex-basis控制项目如何共享空间。
+
+## 常见Flexbox模式
+
+导航栏使用flexbox的space-between实现均匀分布。使用justify-content center和align-items center可以轻松实现内容的垂直和水平居中。卡片行使用flex-wrap创建自动调整列数的响应式布局。
+
+## Grid基础
+
+CSS Grid同时在两个轴上工作，使其非常适合页面级布局。用grid-template-columns和grid-template-rows定义行和列。使用fr单位进行灵活大小调整，使用gap在网格项之间保持一致间距。
+
+## 常见Grid模式
+
+使用grid-template-areas可以轻松实现包含头部、尾部、侧边栏和主内容的神圣布局。使用grid-column和grid-row实现不同列和行跨度的杂志风格布局。仪表板布局结合固定和灵活列，实现一致的导航和可变的内容区域。
+
+## 结合Flexbox和Grid
+
+使用Grid进行整体页面布局，Flexbox用于网格单元格内的组件。Grid处理宏观结构，而Flexbox管理微观布局，如导航项、卡片内容和表单元素。这种组合几乎涵盖了所有布局需求。
+
+## 响应式技术
+
+使用媒体查询在不同断点更改网格模板。auto-fill和auto-fit配合minmax创建无需媒体查询的响应式网格。容器查询让组件响应自身大小而非视口，实现真正可复用的布局组件。

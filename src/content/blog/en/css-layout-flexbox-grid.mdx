@@ -1,0 +1,34 @@
+---
+title: "CSS Layout Mastery: Flexbox and Grid in Practice"
+excerpt: "Practical examples and patterns for building responsive layouts using CSS Flexbox and Grid."
+date: "2025-01-25"
+category: "Software Tips"
+tags: ["CSS", "Flexbox", "Grid", "Web Design"]
+author: "Sarah Lin"
+---
+
+Modern CSS layout with Flexbox and Grid has replaced floats and tables for page layout. Mastering these tools gives you complete control over how content flows and responds to different screen sizes.
+
+## Flexbox Fundamentals
+
+Flexbox works on a single axis, either row or column. Set display flex on a container, then use justify-content for main axis alignment and align-items for cross axis alignment. Flex-grow, flex-shrink, and flex-basis control how items share space.
+
+## Common Flexbox Patterns
+
+Navigation bars use flexbox with space-between for even distribution. Centering content both vertically and horizontally is simple with justify-content center and align-items center. Card rows use flex-wrap to create responsive layouts that automatically adjust the number of columns.
+
+## Grid Fundamentals
+
+CSS Grid works on two axes simultaneously, making it ideal for page-level layouts. Define rows and columns with grid-template-columns and grid-template-rows. Use fr units for flexible sizing, and gap for consistent spacing between grid items.
+
+## Common Grid Patterns
+
+The holy grail layout with header, footer, sidebar, and main content is straightforward with grid-template-areas. Magazine-style layouts with varying column and row spans use grid-column and grid-row. Dashboard layouts combine fixed and flexible columns for consistent navigation with adaptable content areas.
+
+## Combining Flexbox and Grid
+
+Use Grid for the overall page layout and Flexbox for components within grid cells. Grid handles the macro structure while Flexbox manages micro layouts like navigation items, card content, and form elements. This combination covers virtually every layout need.
+
+## Responsive Techniques
+
+Use media queries to change grid templates at different breakpoints. The auto-fill and auto-fit functions with minmax create responsive grids without media queries. Container queries let components respond to their own size rather than the viewport, enabling truly reusable layout components.

@@ -1,0 +1,34 @@
+---
+title: "Docker for Beginners: Containerize Your Applications"
+excerpt: "A practical introduction to Docker containers, images, and workflows for modern software development."
+date: "2025-03-05"
+category: "Software Tips"
+tags: ["Docker", "Containers", "DevOps"]
+author: "Alex Chen"
+---
+
+Docker has become the standard for packaging and deploying applications. Understanding containers helps you create consistent development environments and simplify deployment across different platforms.
+
+## What Are Containers
+
+Containers package an application with all its dependencies into a standardized unit. Unlike virtual machines, containers share the host operating system kernel, making them lightweight and fast to start. This means your application runs identically on your laptop, your teammate computer, and production servers.
+
+## Installing Docker
+
+Install Docker Desktop for Mac or Windows, which includes Docker Engine, Docker CLI, and Docker Compose. On Linux, install Docker Engine and Docker Compose separately from the official repositories. Verify installation with docker run hello-world.
+
+## Core Concepts
+
+Images are read-only templates used to create containers. Containers are running instances of images. Dockerfiles define how to build images with a series of instructions. Docker Hub is a public registry where you can find and share pre-built images for common software.
+
+## Writing a Dockerfile
+
+Start with a base image like node:18 or python:3.11. Use COPY to add your code, RUN to install dependencies, EXPOSE to document ports, and CMD to specify the startup command. Keep images small by using multi-stage builds and minimizing layers.
+
+## Docker Compose
+
+Docker Compose defines multi-container applications in a single YAML file. Define your web server, database, cache, and other services together. Start everything with docker compose up. This is perfect for local development environments that need multiple services running.
+
+## Common Workflows
+
+Use volume mounts to sync code between host and container for live development. Use environment variables for configuration. Build and push images to a registry for deployment. Learn to read container logs for debugging and use docker exec to run commands inside running containers.

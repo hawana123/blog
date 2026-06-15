@@ -21,18 +21,35 @@
   },
   "about": {
     "title": "About TechPulse",
-    "p1": "TechPulse was founded with a simple mission: to help people make better technology decisions. In a world overwhelmed with apps, tools, and gadgets, we cut through the noise to bring you clear, actionable insights.",
-    "p2": "Our team of technology enthusiasts and writers brings years of hands-on experience with productivity software, collaboration tools, and emerging technologies. We don't just list features — we test, compare, and share real-world perspectives.",
-    "p3": "Whether you're a remote worker setting up your digital workspace, a student looking for the best note-taking apps, or a professional seeking to optimize your workflow, TechPulse has something for you.",
-    "p4": "We believe that the right tools can transform the way you work and live. That's why every article we publish is thoroughly researched and written with your practical needs in mind.",
+    "intro": "TechPulse was founded in 2023 with a simple mission: to help people navigate the ever-expanding world of technology with confidence. In an era where new apps, tools, and platforms emerge daily, we cut through the noise to deliver honest, in-depth analysis you can actually use.",
     "mission": "Our Mission",
-    "missionText": "To empower individuals and teams with honest, thorough technology reviews and tutorials that drive real productivity improvements.",
-    "team": "Our Values",
-    "teamText": "We prioritize accuracy, objectivity, and practical usefulness in everything we publish. Our reviews are based on real usage, not just spec sheets."
+    "missionText": "To empower individuals and teams with honest, thorough technology reviews and tutorials that drive real productivity improvements. We believe that the right tools, used the right way, can transform how you work and live.",
+    "storyTitle": "Our Story",
+    "storyP1": "TechPulse began when our founder, Alex Chen, found himself spending more time evaluating productivity tools than actually being productive. After testing dozens of project management apps, note-taking solutions, and communication platforms for his remote team, he realized there was a gap in the market: most tech blogs either skimmed the surface or were clearly paid promotions.",
+    "storyP2": "What started as a personal blog documenting real-world tool comparisons quickly grew into a community of technology professionals, remote workers, and productivity enthusiasts. Today, TechPulse publishes rigorously tested guides and reviews across software development, productivity systems, cybersecurity, and emerging tech trends.",
+    "storyP3": "Every article on TechPulse goes through a multi-step review process. We test tools in real workflows, compare alternatives side-by-side, and update our content regularly to reflect the latest features and pricing changes. Our goal is simple: save you time and help you make informed decisions.",
+    "valuesTitle": "What We Stand For",
+    "value1Title": "Hands-On Testing",
+    "value1Text": "We don't write about tools we haven't used. Every review is based on at least two weeks of real-world usage.",
+    "value2Title": "Editorial Independence",
+    "value2Text": "Our reviews are never influenced by advertisers or affiliate partnerships. Our opinions are our own.",
+    "value3Title": "Practical Focus",
+    "value3Text": "We prioritize actionable advice over generic descriptions. Every article should leave you with clear next steps.",
+    "value4Title": "Continuous Updates",
+    "value4Text": "Technology changes fast. We regularly revisit and update our content to ensure accuracy and relevance.",
+    "teamTitle": "Meet the Team",
+    "teamIntro": "Our writers and editors bring diverse expertise in software engineering, cybersecurity, productivity consulting, and technical writing.",
+    "editorialTitle": "Our Editorial Standards",
+    "editorialP1": "Maintaining trust with our readers is our highest priority. We adhere to strict editorial guidelines to ensure every piece of content meets our quality bar.",
+    "editorialP2": "Before any article is published, it must satisfy the following criteria:",
+    "editorialBullet1": "The author has hands-on experience with the tools or topics covered.",
+    "editorialBullet2": "All factual claims are verified against primary sources or direct testing.",
+    "editorialBullet3": "Affiliate relationships and sponsorships are clearly disclosed where applicable.",
+    "editorialBullet4": "Content is reviewed by at least one editor for accuracy, clarity, and usefulness."
   },
   "contact": {
     "title": "Contact Us",
-    "subtitle": "Have a question, suggestion, or partnership inquiry? We'd love to hear from you.",
+    "subtitle": "Have a question, suggestion, or partnership inquiry? We'd love to hear from you. Fill out the form below and our team will get back to you as soon as possible.",
     "name": "Your Name",
     "email": "Email Address",
     "subject": "Subject",
@@ -42,7 +59,11 @@
     "emailLabel": "Email",
     "responseTime": "We typically respond within 24-48 hours.",
     "address": "Location",
-    "addressValue": "San Francisco, CA, United States"
+    "addressValue": "San Francisco, CA, United States",
+    "success": "Thank you for your message! We have received it and will respond shortly.",
+    "required": "This field is required.",
+    "invalidEmail": "Please enter a valid email address.",
+    "followUs": "Follow Us"
   },
   "privacy": {
     "title": "Privacy Policy",
@@ -113,6 +134,20 @@
     "disclaimer": "Disclaimer"
   },
   "adsense": {
-    "placeholder": "Advertisement Space"
+    "placeholder": "Advertisement"
+  },
+  "toc": {
+    "title": "Table of Contents"
+  },
+  "relatedPosts": {
+    "title": "Related Articles"
+  },
+  "share": {
+    "share": "Share",
+    "copyLink": "Copy link"
+  },
+  "authorCard": {
+    "writtenBy": "Written by",
+    "viewProfile": "View Profile"
   }
 }

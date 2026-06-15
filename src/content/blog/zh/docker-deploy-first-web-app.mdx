@@ -1,0 +1,699 @@
+---
+title: "Docker 实战：从零开始部署你的第一个 Web 应用"
+excerpt: "从 Docker 基础概念到多容器编排，手把手带你完成一个生产级全栈应用的容器化部署。"
+date: "2025-06-14"
+category: "科技趋势"
+tags: ["Docker", "DevOps", "部署", "教程", "Web开发"]
+author: "Alex Chen"
+---
+
+第一次听说 Docker 时，介绍让它听起来很简单："把你的应用和它运行所需的一切打包在一起"。但当我真正尝试容器化第一个应用时，花了三天时间与网络配置、卷权限和神秘的"连接被拒绝"错误搏斗。
+
+我需要的不是概念解释——而是有人带我走过每一步，解释每个决策背后的原因，并展示生产级配置真正长什么样。
+
+这篇教程就是那个指南。读完之后，你将拥有一个基于 Docker Compose 运行的多容器应用，理解每个配置选择背后的"为什么"，并且知道如何将它部署到生产服务器。
+
+## 我们要构建什么
+
+我们将容器化一个包含以下组件的全栈应用：
+- Node.js/Express API 后端
+- React 前端
+- PostgreSQL 数据库
+- Redis 缓存
+
+这个技术栈代表了 80% 的真实 Web 应用。一旦你理解了如何容器化它，就能将方法适配到几乎任何技术栈。
+
+## 前置条件
+
+- 电脑上已安装 Docker 和 Docker Compose
+- 基本的命令行熟悉度
+- 安装了 Node.js（用于本地开发，Docker 本身不需要）
+
+验证 Docker 是否正常工作：
+
+```bash
+docker --version
+docker compose version
+```
+
+## 第一步：理解 Docker 基础概念
+
+在写任何配置之前，先澄清三个让我初学时困惑的概念：
+
+### 镜像 vs 容器
+
+**镜像**是一个蓝图——一个只读的模板，包含你的应用代码、运行时、库和依赖。就像编程中的类。
+
+**容器**是镜像的运行实例。它是隔离的，有自己的文件系统，作为一个独立进程运行。就像从类实例化的对象。
+
+一个镜像可以生成很多容器。这就是 Docker 实现扩展的方式——你在负载均衡器后面运行同一镜像的多个容器。
+
+### Dockerfile
+
+`Dockerfile` 是一个文本文件，包含构建镜像的指令。每条指令创建一个"层"，Docker 会缓存没有变化的层。这就是为什么重建镜像在第一次之后很快——未变化的层被复用了。
+
+### Docker Compose
+
+Docker 处理单容器，而 **Docker Compose** 编排多容器应用。你在 `docker-compose.yml` 中定义所有服务、网络和卷，然后用一条命令启动一切。
+
+这就是我们要用于全栈应用的工具。
+
+## 第二步：创建应用结构
+
+创建项目结构：
+
+```
+docker-demo/
+├── backend/
+│   ├── src/
+│   │   └── index.js
+│   ├── package.json
+│   └── Dockerfile
+├── frontend/
+│   ├── src/
+│   │   └── App.jsx
+│   ├── package.json
+│   └── Dockerfile
+├── nginx/
+│   └── nginx.conf
+├── docker-compose.yml
+└── .env
+```
+
+### 后端（Node.js/Express）
+
+创建 `backend/package.json`：
+
+```json
+{
+  "name": "docker-demo-backend",
+  "version": "1.0.0",
+  "dependencies": {
+    "express": "^4.18.0",
+    "pg": "^8.11.0",
+    "redis": "^4.6.0",
+    "cors": "^2.8.5"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  }
+}
+```
+
+创建 `backend/src/index.js`：
+
+```javascript
+const express = require('express');
+const { Pool } = require('pg');
+const redis = require('redis');
+const cors = require('cors');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// 数据库连接
+const pool = new Pool({
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 5432,
+  database: process.env.DB_NAME || 'myapp',
+  user: process.env.DB_USER || 'postgres',
+  password: process.env.DB_PASSWORD || 'password',
+});
+
+// Redis 连接
+const redisClient = redis.createClient({
+  url: `redis://${process.env.REDIS_HOST || 'localhost'}:6379`
+});
+redisClient.connect().catch(console.error);
+
+// 健康检查接口
+app.get('/health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    const redisPing = await redisClient.ping();
+    res.json({ status: 'healthy', database: 'connected', cache: redisPing });
+  } catch (error) {
+    res.status(500).json({ status: 'unhealthy', error: error.message });
+  }
+});
+
+// 带缓存的 API 接口
+app.get('/api/data', async (req, res) => {
+  try {
+    // 先查缓存
+    const cached = await redisClient.get('api_data');
+    if (cached) {
+      return res.json({ source: 'cache', data: JSON.parse(cached) });
+    }
+
+    // 回退到数据库
+    const result = await pool.query('SELECT NOW() as time, version() as version');
+    const data = result.rows[0];
+    
+    // 缓存 60 秒
+    await redisClient.setEx('api_data', 60, JSON.stringify(data));
+    
+    res.json({ source: 'database', data });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});
+```
+
+### 后端 Dockerfile
+
+创建 `backend/Dockerfile`：
+
+```dockerfile
+# 阶段 1：依赖
+FROM node:20-alpine AS dependencies
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+# 阶段 2：生产
+FROM node:20-alpine AS production
+WORKDIR /app
+
+# 创建非 root 用户（安全考虑）
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+# 从阶段 1 复制依赖
+COPY --from=dependencies --chown=nodejs:nodejs /app/node_modules ./node_modules
+
+# 复制应用代码
+COPY --chown=nodejs:nodejs src ./src
+COPY --chown=nodejs:nodejs package.json ./
+
+# 切换到非 root 用户
+USER nodejs
+
+# 暴露端口
+EXPOSE 3001
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3001/health', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))"
+
+# 启动应用
+CMD ["npm", "start"]
+```
+
+**关键决策解释：**
+
+1. **多阶段构建**：我们使用两个阶段——一个安装依赖，一个用于生产。最终镜像不包含 npm 缓存或构建工具，更小也更安全。
+
+2. **Alpine Linux**：`node:20-alpine` 镜像约 40MB，而完整 Debian 版本约 900MB。生产环境中，更小的镜像意味着更快的部署和更少的攻击面。
+
+3. **非 root 用户**：在容器内以 `root` 运行是安全风险。我们创建 `nodejs` 用户并在其下运行应用。
+
+4. **健康检查**：Docker 可以监控你的应用是否真的健康，而不只是正在运行。如果健康检查失败，Docker 可以自动重启容器。
+
+## 第三步：前端（React）
+
+创建 `frontend/package.json`：
+
+```json
+{
+  "name": "docker-demo-frontend",
+  "version": "1.0.0",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  }
+}
+```
+
+创建 `frontend/src/App.jsx`：
+
+```jsx
+import { useState, useEffect } from 'react';
+
+function App() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/data')
+      .then(res => res.json())
+      .then(data => {
+        setData(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  return (
+    <div style={{ padding: '2rem', fontFamily: 'system-ui' }}>
+      <h1>Docker 演示应用</h1>
+      {loading && <p>加载中...</p>}
+      {error && <p style={{ color: 'red' }}>错误：{error}</p>}
+      {data && (
+        <div>
+          <p><strong>数据来源：</strong>{data.source}</p>
+          <pre>{JSON.stringify(data.data, null, 2)}</pre>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
+```
+
+创建 `frontend/src/main.jsx`：
+
+```jsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+```
+
+创建 `frontend/index.html`：
+
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docker 演示</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
+```
+
+### 前端 Dockerfile
+
+创建 `frontend/Dockerfile`：
+
+```dockerfile
+# 阶段 1：构建
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# 阶段 2：生产环境使用 Nginx
+FROM nginx:alpine AS production
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+```
+
+这是一个常见模式：在 Node 容器中构建 React 应用，然后用 Nginx 提供静态文件。Nginx 提供静态文件的效率远高于 Node.js。
+
+## 第四步：Nginx 配置
+
+创建 `nginx/nginx.conf`：
+
+```nginx
+server {
+    listen 80;
+    server_name localhost;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # 提供静态文件
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 将 API 请求代理到后端
+    location /api/ {
+        proxy_pass http://backend:3001/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Gzip 压缩
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css application/json application/javascript text/xml;
+}
+```
+
+这个 Nginx 配置做了两件关键的事：
+1. 提供 React 应用的静态文件
+2. 将 `/api/*` 请求代理到后端服务
+
+## 第五步：Docker Compose 编排
+
+创建 `docker-compose.yml`：
+
+```yaml
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  db:
+    image: postgres:16-alpine
+    container_name: demo-db
+    environment:
+      POSTGRES_DB: myapp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secretpassword}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: demo-redis
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - app-network
+
+  # 后端 API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: demo-backend
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: myapp
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD:-secretpassword}
+      REDIS_HOST: redis
+    ports:
+      - "3001:3001"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # 前端（Nginx）
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: demo-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+# 命名卷用于数据持久化
+volumes:
+  postgres_data:
+  redis_data:
+
+# 服务间通信的自定义网络
+networks:
+  app-network:
+    driver: bridge
+```
+
+创建 `.env`：
+
+```
+DB_PASSWORD=mysecurepassword123
+```
+
+### Docker Compose 关键概念
+
+**Services**：每个 service 定义一个容器。可以从 Dockerfile 构建（`backend`、`frontend`），也可以使用现有镜像（`db`、`redis`）。
+
+**Depends_on 配合健康检查**：后端等待数据库和 Redis 健康后才启动。这防止了常见的"数据库连接被拒绝"错误——应用在其依赖准备好之前不会启动。
+
+**Networks**：同一网络中的服务可以使用服务名作为主机名互相通信。后端连接 `db:5432` 和 `redis:6379`——Docker 的内部 DNS 会将这些解析到正确的容器。
+
+**Volumes**：`postgres_data` 和 `redis_data` 是命名卷。即使你删除并重建容器，数据也会持久化。没有卷的话，每次重启数据库都会重置。
+
+## 第六步：运行应用
+
+启动一切：
+
+```bash
+docker compose up --build
+```
+
+`--build` 标志确保 Docker 在代码变化时重建镜像。
+
+首次运行时，Docker 会：
+1. 拉取 PostgreSQL、Redis 和 Nginx 基础镜像
+2. 构建后端和前端镜像
+3. 创建网络和卷
+4. 按正确顺序启动所有容器
+
+运行后访问：
+- 前端：http://localhost
+- 后端 API：http://localhost:3001/api/data
+- 后端健康检查：http://localhost:3001/health
+
+### 常见首次运行问题
+
+**"连接被拒绝"到数据库**：后端在 PostgreSQL 完成初始化之前启动了。按 `Ctrl+C` 停止，然后重新运行 `docker compose up`。健康检查依赖通常能防止这个问题，但在非常慢的机器上仍可能出现竞态条件。
+
+**端口已被占用**：如果你在本地运行了 PostgreSQL 或其他服务占用了 5432 端口，把 `docker-compose.yml` 中的端口映射改为 `"5433:5432"。
+
+**前端显示空白页**：检查浏览器控制台。如果看到 CORS 错误，说明 Nginx 代理配置不正确。验证 `nginx.conf` 中的 `location /api/` 块。
+
+## 第七步：生产部署
+
+生产环境需要一些额外配置：
+
+### 环境管理
+
+绝不要把带真实密钥的 `.env` 文件提交到版本控制。替代方案：
+
+1. 本地创建 `.env.production`（不要提交）
+2. 在服务器上手动创建环境文件
+3. 使用 Docker secrets 或 secrets 管理器存放敏感数据
+
+### 生产环境 Docker Compose
+
+创建 `docker-compose.prod.yml`：
+
+```yaml
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: myapp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - /var/lib/docker/volumes/demo_postgres:/var/lib/postgresql/data
+    networks:
+      - app-network
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - /var/lib/docker/volumes/demo_redis:/data
+    networks:
+      - app-network
+    restart: always
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: myapp
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: redis
+    depends_on:
+      - db
+      - redis
+    networks:
+      - app-network
+    restart: always
+    deploy:
+      replicas: 2
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: always
+
+  # 反向代理 / SSL 终结
+  nginx-proxy:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - app-network
+    restart: always
+
+networks:
+  app-network:
+    driver: bridge
+```
+
+### 部署到 VPS
+
+1. **设置服务器**（DigitalOcean、阿里云、腾讯云等）
+2. **安装 Docker**：`curl -fsSL https://get.docker.com | sh`
+3. **克隆代码仓库**
+4. **创建环境文件**：`echo "DB_PASSWORD=你的密码" > .env`
+5. **启动应用**：`docker compose -f docker-compose.prod.yml up -d`
+
+`-d` 标志让容器在后台运行（ detached 模式）。
+
+### 使用 Let's Encrypt 配置 SSL
+
+生产环境需要 HTTPS。最简单的方法是使用 Traefik 或 Caddy 作为反向代理——它们自动处理 Let's Encrypt 证书。
+
+以下是基于 Caddy 的 compose 补充配置：
+
+```yaml
+  caddy:
+    image: caddy:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - app-network
+```
+
+以及 `Caddyfile`：
+
+```
+yourdomain.com {
+    reverse_proxy frontend:80
+}
+
+api.yourdomain.com {
+    reverse_proxy backend:3001
+}
+```
+
+Caddy 自动获取和续期 SSL 证书。零配置 needed。
+
+## 第八步：监控和日志
+
+生产环境中，你需要了解正在发生什么：
+
+### 查看日志
+
+```bash
+# 所有服务
+docker compose logs -f
+
+# 特定服务
+docker compose logs -f backend
+
+# 最近 100 行
+docker compose logs --tail=100 backend
+```
+
+### 资源监控
+
+```bash
+# 容器状态（CPU、内存、网络）
+docker stats
+
+# 或者使用监控栈：
+# - Prometheus + Grafana 用于指标
+# - Loki 用于日志聚合
+```
+
+## 总结：你学到了什么
+
+通过这篇教程，你构建并部署了一个生产就绪的多容器应用。以下是你现在理解的内容：
+
+1. **Dockerfile 最佳实践**：多阶段构建、非 root 用户、健康检查、Alpine 镜像
+2. **Docker Compose 编排**：服务依赖、网络、卷、健康检查
+3. **生产部署**：环境管理、SSL、反向代理
+4. **运维基础**：日志、监控、故障排查
+
+### 下一步
+
+- 学习 Docker Swarm 或 Kubernetes，用于大规模容器编排
+- 用 GitHub Actions 实现 CI/CD，自动化构建和部署
+- 探索 Docker secrets 管理敏感配置
+- 用 ELK 栈或 Loki 搭建集中式日志系统
+
+Docker 的学习曲线集中在前端，但一旦这些概念融会贯通，你会以前所未有的信心部署应用。"在哪里运行都完全一样"的一致性，真的会改变游戏规则。

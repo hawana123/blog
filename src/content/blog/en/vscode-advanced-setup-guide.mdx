@@ -1,0 +1,323 @@
+---
+title: "VS Code Advanced Configuration: The Complete Setup for Productivity"
+excerpt: "The exact VS Code settings, extensions, and keyboard shortcuts I use to write code 30% faster after five years of daily use."
+date: "2025-06-12"
+category: "Software Tips"
+tags: ["VS Code", "Editor", "Configuration", "Productivity", "Development"]
+author: "Mike Johnson"
+---
+
+I've been using VS Code as my primary editor for over five years, across projects ranging from small React apps to large-scale distributed systems. During that time, I've iterated through hundreds of extensions, tweaked countless settings, and developed a setup that genuinely makes me write code faster and with fewer errors.
+
+This isn't a generic "top 10 extensions" list. This is my actual, battle-tested configuration—the settings.json entries, the keybindings, the extensions that survive every "spring cleaning" purge, and the workflows that save me hours every week.
+
+## The Philosophy: Keyboard-First, Minimal Visual Noise
+
+My guiding principle is simple: every time I reach for the mouse, I'm losing seconds that compound into hours. The goal is to keep my hands on the keyboard and my eyes on the code.
+
+Visually, I remove everything that doesn't directly help me write or read code. No activity bar, no status bar clutter, no breadcrumbs, no minimap. Just code, with enough context to navigate efficiently.
+
+## Essential Settings (settings.json)
+
+Here's my core settings.json. I'll explain the non-obvious choices after:
+
+```json
+{
+  "editor.fontFamily": "JetBrains Mono, Fira Code, monospace",
+  "editor.fontSize": 14,
+  "editor.lineHeight": 28,
+  "editor.fontLigatures": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.rulers": [80, 120],
+  "editor.wordWrap": "on",
+  "editor.minimap.enabled": false,
+  "editor.scrollBeyondLastLine": false,
+  "editor.renderWhitespace": "boundary",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": true,
+  "editor.stickyScroll.enabled": true,
+  "editor.cursorBlinking": "solid",
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": false
+  },
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "workbench.tree.indent": 20,
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.colorTheme": "One Dark Pro",
+  "workbench.activityBar.location": "hidden",
+  "workbench.statusBar.visible": true,
+  "workbench.editor.enablePreview": false,
+  "terminal.integrated.fontSize": 13,
+  "terminal.integrated.cursorStyle": "line",
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.next": true,
+    "**/coverage": true
+  }
+}
+```
+
+### Key Settings Explained
+
+**`editor.rulers: [80, 120]`**: Two vertical lines in the editor. The 80-character ruler follows the traditional standard; the 120-character one marks my practical maximum line length. These visual guides prevent me from writing overly long lines without thinking about it.
+
+**`editor.renderWhitespace: "boundary"`**: Shows whitespace characters only when they're at the start/end of a line or multiple spaces appear between words. This catches trailing whitespace and accidental double spaces without cluttering the view with dots everywhere.
+
+**`editor.stickyScroll.enabled: true`**: When you scroll deep into a function, the function definition "sticks" to the top of the viewport. Essential for navigating large files—you always know what function or class you're in.
+
+**`workbench.editor.enablePreview: false`**: By default, single-clicking a file in the explorer opens it in "preview mode" (the tab title is in italics and gets replaced when you open another file). I disable this because I find it confusing—every file I open should stay open until I explicitly close it.
+
+**`editor.quickSuggestions`**: I disable autocomplete inside comments and strings. Nothing is more annoying than typing a sentence in a comment and having VS Code suggest `function` or `const`.
+
+## Extensions That Actually Matter
+
+I've uninstalled 90% of the extensions I've tried. These are the ones that remain:
+
+### Core Productivity
+
+**ESLint + Prettier**: Non-negotiable. ESLint catches bugs and enforces code style; Prettier formats code consistently. With `"editor.formatOnSave": true`, my code is automatically formatted every time I save. The mental overhead of "is this indented correctly?" disappears entirely.
+
+**GitLens**: Transforms VS Code's basic git integration into something powerful. I can see who wrote each line of code and when, view blame annotations, compare branches, and navigate commit history without leaving the editor.
+
+**Todo Tree**: Scans your codebase for `TODO`, `FIXME`, `HACK` comments and presents them in a searchable tree view. Before I start a refactoring session, I check Todo Tree to see what technical debt exists in the files I'm touching.
+
+**Path Intellisense**: Autocompletes file paths when importing. Small but saves countless typos in import statements.
+
+### Language-Specific
+
+**TypeScript Importer**: When I type a function or type that exists elsewhere in the project but isn't imported, this extension suggests the import and adds it automatically. Cuts down the "type something, get error, find file, add import" cycle.
+
+**Tailwind CSS IntelliSense**: If you use Tailwind, this is essential. Autocompletes class names, shows the generated CSS on hover, and catches typos in utility classes.
+
+**Python**: The official Microsoft extension. Essential for Python development with IntelliSense, linting, debugging, and Jupyter notebook support.
+
+**Rust Analyzer**: If you write Rust, this is the gold standard. Type inference, borrow checker explanations, refactoring tools—all seamlessly integrated.
+
+### Navigation and Search
+
+**Project Manager**: Save frequently accessed projects and switch between them with keyboard shortcuts. I have 15+ projects saved and switch between them without touching the file explorer.
+
+**Bookmarks**: Mark specific lines across files and navigate between them. I use this during complex refactors—bookmark the call site, the implementation, and the test, then jump between them instantly.
+
+### Visual Enhancements
+
+**Material Icon Theme**: Makes file icons in the explorer recognizable at a glance. Small thing, but after using it for years, opening a project without it feels disorienting.
+
+**One Dark Pro**: My color theme of choice. Good contrast, pleasant colors, consistent across languages. I've tried dozens of themes and always come back to this one.
+
+**Error Lens**: Displays errors and warnings inline next to the code instead of just in the problems panel. You see issues immediately without looking away from your code.
+
+## Custom Keybindings That Changed Everything
+
+I have over 50 custom keybindings, but these are the ones I use hundreds of times per day:
+
+```json
+[
+  {
+    "key": "cmd+k cmd+s",
+    "command": "workbench.action.files.saveAll"
+  },
+  {
+    "key": "cmd+shift+o",
+    "command": "workbench.action.quickOpen"
+  },
+  {
+    "key": "cmd+shift+f",
+    "command": "workbench.action.findInFiles"
+  },
+  {
+    "key": "cmd+d",
+    "command": "editor.action.addSelectionToNextFindMatch"
+  },
+  {
+    "key": "cmd+shift+d",
+    "command": "editor.action.copyLinesDownAction"
+  },
+  {
+    "key": "cmd+shift+k",
+    "command": "editor.action.deleteLines"
+  },
+  {
+    "key": "cmd+shift+up",
+    "command": "editor.action.moveLinesUpAction"
+  },
+  {
+    "key": "cmd+shift+down",
+    "command": "editor.action.moveLinesDownAction"
+  },
+  {
+    "key": "cmd+shift+\\",
+    "command": "editor.action.jumpToBracket"
+  },
+  {
+    "key": "cmd+shift+m",
+    "command": "editor.action.toggleWordWrap"
+  },
+  {
+    "key": "cmd+k cmd+c",
+    "command": "editor.action.addCommentLine"
+  },
+  {
+    "key": "cmd+k cmd+u",
+    "command": "editor.action.removeCommentLine"
+  },
+  {
+    "key": "cmd+1",
+    "command": "workbench.action.openEditorAtIndex1"
+  },
+  {
+    "key": "cmd+2",
+    "command": "workbench.action.openEditorAtIndex2"
+  },
+  {
+    "key": "cmd+3",
+    "command": "workbench.action.openEditorAtIndex3"
+  },
+  {
+    "key": "cmd+k cmd+w",
+    "command": "workbench.action.closeAllEditors"
+  },
+  {
+    "key": "cmd+k cmd+o",
+    "command": "workbench.action.closeOtherEditors"
+  }
+]
+```
+
+### The Most Important Ones
+
+**`Cmd+D` (Add Selection to Next Find Match)**: Select a word, press Cmd+D repeatedly to select the next occurrences. Then type once to edit all selected instances simultaneously. This single shortcut probably saves me 30 minutes per week.
+
+**`Cmd+Shift+K` (Delete Lines)**: Deletes the current line without selecting it first. Sounds trivial, but when you're cleaning up code, removing lines one by one without the select-delete dance is surprisingly satisfying.
+
+**`Cmd+Shift+Up/Down` (Move Lines)**: Move the current line (or selected lines) up or down. Essential for reordering code without copy-paste.
+
+**`Cmd+Shift+\` (Jump to Bracket)**: Jump between matching brackets. In a deeply nested function, this is the fastest way to navigate.
+
+## Advanced Workflows
+
+### Multi-Cursor Editing
+
+VS Code's multi-cursor support is incredibly powerful once you learn to use it intentionally:
+
+1. **Column selection**: `Alt+Shift+Click` or `Alt+Shift+Drag` to create a rectangular selection. Perfect for editing aligned text or CSV data.
+
+2. **Select all occurrences**: `Cmd+Shift+L` after selecting a word selects all instances in the file. Then type to replace all at once—but use with caution!
+
+3. **Multiple cursors with click**: `Alt+Click` to place multiple cursors. I use this when I need to add the same text at specific positions that don't follow a pattern.
+
+### Refactoring with Rename Symbol
+
+`F2` (Rename Symbol) is the safest way to rename variables, functions, or classes. Unlike find-and-replace, it uses TypeScript's understanding of your code to only rename the actual symbol, not coincidental name matches in strings or comments.
+
+### Go to Definition vs Go to Type Definition
+
+- `F12` (Go to Definition): Jump to where a symbol is defined
+- `Cmd+Shift+F12` (Go to Type Definition): Jump to the type definition (useful for variables inferred from complex types)
+
+I use the second one more than I expected, especially when working with libraries that have complex generic types.
+
+### The Command Palette Is Your Friend
+
+`Cmd+Shift+P` opens the command palette. Every VS Code command is accessible here, and you can type partial commands. Examples:
+- "fold all" to collapse all code blocks
+- "transform to uppercase" to change selected text case
+- "sort lines ascending" to alphabetize imports
+
+I discover a new useful command every few months just by browsing the palette when I'm bored.
+
+## Debugging Configuration
+
+VS Code's debugging is powerful but requires setup. Here's my standard Node.js launch configuration:
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Server",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Debug Current Test File",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vitest", "run", "${relativeFile}"],
+      "console": "integratedTerminal"
+    }
+  ]
+}
+```
+
+With this, `F5` starts my development server with the debugger attached, and I can set breakpoints, inspect variables, and step through code without leaving the editor.
+
+## Performance Optimization
+
+As projects grow, VS Code can slow down. Here's how I keep it fast:
+
+1. **Disable unused extensions**: Even inactive extensions consume memory. I uninstall anything I haven't used in a month.
+
+2. **Exclude large folders from search**: My `search.exclude` setting (shown earlier) prevents VS Code from indexing `node_modules`, build output, and generated files.
+
+3. **Increase file watcher limit** (on macOS/Linux): Large projects can hit the system file watcher limit. Increase it with `ulimit -n 4096`.
+
+4. **Use workspace settings for project-specific configs**: Instead of cluttering your global settings, put project-specific settings in `.vscode/settings.json` within each repository.
+
+## The .vscode Folder: Project-Specific Configuration
+
+Every project I work on has a `.vscode` folder committed to the repository:
+
+```
+.vscode/
+├── settings.json       # Project-specific editor settings
+├── extensions.json     # Recommended extensions for this project
+├── launch.json         # Debug configurations
+└── tasks.json          # Custom build/test tasks
+```
+
+This ensures that anyone who clones the repo gets the same editor experience. The `extensions.json` is especially useful—new team members get a popup recommending the extensions needed for this project.
+
+Example `extensions.json`:
+
+```json
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next"
+  ]
+}
+```
+
+## Final Thoughts
+
+Your editor is the tool you spend 8+ hours per day using. Optimizing it isn't procrastination—it's compounding time savings.
+
+But here's the important part: don't try to adopt everything at once. My current setup is the result of five years of gradual refinement. Start with the settings and 3-5 extensions that solve your biggest pain points. Add one new shortcut per week. In six months, you'll have a setup that feels like an extension of your mind.
+
+The goal isn't to have the most complex configuration—it's to have one so smooth that you forget the editor is even there, and just write code.

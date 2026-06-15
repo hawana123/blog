@@ -21,14 +21,19 @@ export default function AdSlot({ className = '', size = 'banner' }: AdSlotProps)
   const t = useTranslations('adsense');
 
   const sizeClasses = {
-    banner: 'h-[90px] w-full',
-    rectangle: 'h-[250px] w-full',
-    sidebar: 'h-[600px] w-full',
+    banner: 'min-h-[90px] w-full',
+    rectangle: 'min-h-[250px] w-full',
+    sidebar: 'min-h-[600px] w-full',
   };
 
   return (
     <div className={`ad-slot ${sizeClasses[size]} ${className}`}>
-      <span>{t('placeholder')}</span>
+      <div className="w-full h-full bg-gray-50 border border-gray-200 rounded flex flex-col items-center justify-center">
+        <span className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">
+          {t('placeholder')}
+        </span>
+        <span className="text-[10px] text-gray-300">AdSense</span>
+      </div>
     </div>
   );
 }

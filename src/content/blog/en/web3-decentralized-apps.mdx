@@ -9,6 +9,58 @@ author: "Mike Johnson"
 
 After years of hype and speculation, Web3 technologies are beginning to find practical applications beyond cryptocurrency trading. Here is an honest assessment of where decentralized technologies provide genuine value.
 
+## dApp architecture in one paragraph
+
+A typical dApp consists of:
+- Wallet (end‑user key management, e.g., MetaMask),
+- Smart contracts on a blockchain (business logic),
+- A node / provider (Infura, Alchemy) to read/write chain state,
+- A frontend that interacts with the wallet and provider.
+
+![dApp architecture diagram](/images/dapp-architecture-diagram.svg "Four-layer dApp architecture: Wallet, Frontend, Provider, Smart Contracts.")
+*Caption: Four‑layer dApp architecture: Wallet, Frontend, Provider, Smart Contracts.*
+
+## Minimal practical example (read + write)
+
+Below is a tiny web3 example showing how to read a token balance and send a simple transaction using ethers.js. Paste into your code examples section.
+
+```js
+// Read an ERC-20 balance and send a transfer (ethers.js)
+import { ethers } from 'ethers';
+
+async function getBalance(providerUrl, tokenAddress, userAddress) {
+  const provider = new ethers.providers.JsonRpcProvider(providerUrl);
+  const abi = ['function balanceOf(address) view returns (uint256)'];
+  const token = new ethers.Contract(tokenAddress, abi, provider);
+  const balance = await token.balanceOf(userAddress);
+  return ethers.utils.formatUnits(balance, 18);
+}
+
+// Example usage (read-only)
+// getBalance('https://mainnet.infura.io/v3/…', '0xTokenAddress', '0xUserAddress');
+```
+
+![Example ethers.js snippet](/images/ethersjs-code-screenshot.svg "Example ethers.js snippet to read an ERC-20 token balance.")
+*Caption: Example ethers.js snippet to read an ERC‑20 token balance.*
+
+## Security & UX notes (short)
+
+- Never ask users to paste private keys—use wallet connectors.
+- Consider gas costs and add clear UX around transaction confirmation and estimated fees.
+- Audit smart contracts (third‑party or in‑house) before production use.
+
+![Security and UX flow diagrams](/images/security-ux-flows.svg "UX flow for wallet onboarding and transaction confirmation.")
+*Caption: UX flow for wallet onboarding and transaction confirmation.*
+
+## Real-world example
+
+A simple NFT ticketing dApp shows dApp strengths: immutable ownership, transferability, and on‑chain provenance. But it also surfaces UX friction (wallet setup, onboarding costs)—discussing one such project briefly (what worked, what didn’t) makes the article concrete.
+
+![NFT ticketing example](/images/nft-ticketing-case.svg "NFT ticketing example showing mint and wallet transfer.")
+*Caption: NFT ticketing example showing mint and wallet transfer.*
+
+
+
 ## Where Web3 Works Today
 
 Decentralized identity verification is proving valuable for reducing fraud and giving users control over their credentials. Supply chain tracking using blockchain provides transparent, immutable records for food safety, luxury goods authentication, and pharmaceutical tracking. Decentralized storage networks like IPFS offer censorship-resistant content hosting.

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <rect width="100%" height="100%" fill="#f0fdf4"/>
+  <g fill="#065f46" font-family="Arial, Helvetica, sans-serif">
+    <text x="50%" y="20%" font-size="36" text-anchor="middle">Quick setup — Smart plug + Google Home</text>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" fill="#064e3b" font-size="20">
+    <text x="15%" y="40%">1) Plug & vendor app</text>
+    <text x="15%" y="52%">2) Link account in Google Home</text>
+    <text x="15%" y="64%">3) Assign room & create routine</text>
+    <text x="15%" y="76%">4) Test voice command</text>
+  </g>
+</svg>
